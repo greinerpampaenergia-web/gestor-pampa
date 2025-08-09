@@ -1,31 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Rutinas Operaciones CPB</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>Dashboard de Tareas</title>
+    https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
 </head>
 <body>
-    <h1>Rutinas Operaciones CPB</h1>
-    <a href="/add">Agregar nueva tarea</a>
-    <form method="get">
-        <label>Filtrar por estado:</label>
-        <select name="estado">
-            <option value="">Todos</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="completada">Completada</option>
-        </select>
-        <label>Responsable:</label>
-        <input type="text" name="responsable">
-        <button type="submit">Filtrar</button>
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard de Tareas</h1>
+
+    <!-- Contadores -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h5>Total</h5>
+                    <h2>{{ total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h5>Completadas</h5>
+                    <h2>{{ completadas }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-warning">
+                <div class="card-body">
+                    <h5>Pendientes</h5>
+                    <h2>{{ pendientes }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-danger">
+                <div class="card-body">
+                    <h5>Vencidas</h5>
+                    <h2>{{ vencidas }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <form method="GET" class="row mb-4">
+        <div class="col-md-6">
+            <select name="estado" class="form-select">
+                <option value="">Filtrar por estado</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="completada">Completada</option>
+                <option value="vencida">Vencida</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <select name="responsable" class="form-select">
+                <option value="">Filtrar por responsable</option>
+                {% for r in responsables %}
+                    <option value="{{ r }}">{{ r }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 mt-2 text-end">
+            <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+        </div>
     </form>
-    <ul>
-        {% for task in tasks %}
-        <li>
-            <strong>{{ task.titulo }}</strong> - {{ task.estado }} - {{ task.responsable }}
-            <a href="/completar/{{ loop.index0 }}">[Completar]</a>
-            <a href="/tarea/{{ loop.index0 }}">[Ver]</a>
-        </li>
+
+    <!-- Tarjetas de tareas -->
+    <div class="row">
+        {% for tarea in tareas %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ tarea.descripcion }}</h5>
+                    <p class="card-text">
+                        <strong>Responsable:</strong> {{ tarea.responsable }}<br>
+                        <strong>Fecha de creación:</strong> {{ tarea.fecha_creacion }}<br>
+                        <strong>Fecha de entrega:</strong> {{ tarea.fecha_entrega }}<br>
+                        <strong>Estado:</strong> {{ tarea.estado }}
+                    </p>
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" style="width: {{ tarea.progreso }}%;" aria-valuenow="{{ tarea.progreso }}" aria-valuemin="0" aria-valuemax="100">{{ tarea.progreso }}%</div>
+                    </div>
+                    <a href="/editar/{{ tarea.id }}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <a href="/eliminar/{{ tarea.id }}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
+</div>
 </body>
 </html>
