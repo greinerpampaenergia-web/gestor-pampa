@@ -1,57 +1,39 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-tasks = []
+# Simulación de lista de tareas
+tareas = [
+    {
+        'id': 1,
+        'titulo': 'Pantalla PI Arranque Unidades',
+        'descripcion': 'Armar una pantalla en PI Vision en dónde se pueda visualizar todos los hitos del arranque de las unidades',
+        'responsable': 'Gonzalo Reiner',
+        'fecha_creacion': '08/08/2023 18:36',
+        'fecha_entrega': '31/10/2025',
+        'estado': 'pendiente',
+        'progreso': 0
+    }
+]
+
+# Cálculo de contadores
+total = len(tareas)
+completadas = sum(1 for t in tareas if t['estado'] == 'completada')
+pendientes = sum(1 for t in tareas if t['estado'] == 'pendiente')
+vencidas = sum(1 for t in tareas if t['estado'] == 'vencida')
+
+# Lista de responsables únicos
+responsables = sorted(set(t['responsable'] for t in tareas))
 
 @app.route('/')
 def index():
-    estado = request.args.get('estado')
-    responsable = request.args.get('responsable')
-    filtradas = tasks
-
-    if estado:
-        filtradas = [t for t in filtradas if t['estado'] == estado]
-    if responsable:
-        filtradas = [t for t in filtradas if t['responsable'] == responsable]
-
-    return render_template('index.html', tasks=filtradas)
-
-@app.route('/add', methods=['GET', 'POST'])
-def add_task():
-    if request.method == 'POST':
-        nueva_tarea = {
-            'titulo': request.form['titulo'],
-            'descripcion': request.form['descripcion'],
-            'responsable': request.form['responsable'],
-            'fecha_limite': request.form['fecha_limite'],
-            'estado': 'pendiente',
-            'avances': []
-        }
-        tasks.append(nueva_tarea)
-        return redirect(url_for('index'))
-    return render_template('add_task.html')
-
-@app.route('/completar/<int:task_id>')
-def completar(task_id):
-    tasks[task_id]['estado'] = 'completada'
-    return redirect(url_for('index'))
-
-@app.route('/tarea/<int:task_id>')
-def ver_tarea(task_id):
-    tarea = tasks[task_id]
-    return render_template('ver_tarea.html', tarea=tarea, task_id=task_id)
-
-@app.route('/tarea/<int:task_id>/avance', methods=['POST'])
-def agregar_avance(task_id):
-    avance = {
-        'descripcion': request.form['descripcion'],
-        'fecha': request.form['fecha']
-    }
-    tasks[task_id]['avances'].append(avance)
-    return redirect(url_for('ver_tarea', task_id=task_id))
+    return render_template('index.html',
+                           tareas=tareas,
+                           total=total,
+                           completadas=completadas,
+                           pendientes=pendientes,
+                           vencidas=vencidas,
+                           responsables=responsables)
 
 if __name__ == '__main__':
-    import os
-port = int(os.environ.get("PORT", 5000))
-app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
