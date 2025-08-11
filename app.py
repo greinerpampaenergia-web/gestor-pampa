@@ -1,7 +1,7 @@
 import os
 import logging
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -24,18 +24,19 @@ database_url = os.environ.get("DATABASE_URL")
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///rutinas_cpb.db"
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///rutinas_cpb.db'
+
 
 # Initialize the app with the extension
 db.init_app(app)
 
 # Import models after db initialization
-from task_models import Task, ProgressUpdate
-
+with app.app_context():
+    from task_models import Task, ProgressUpdate
+    db.create_all()
+    
 @app.route('/')
 def index():
     tasks = Task.query.all()
