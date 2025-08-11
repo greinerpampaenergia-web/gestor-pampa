@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from config import db
+from app import db  
 
 
 class Task(db.Model):
@@ -53,6 +53,7 @@ class Task(db.Model):
             # Simple calculation: each update adds some progress
             # Can be customized later for more sophisticated tracking
             return min(80, update_count * 20)
+            pass
 
 class ProgressUpdate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -60,6 +61,9 @@ class ProgressUpdate(db.Model):
     description = db.Column(db.Text, nullable=False)
     created_by = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    
+
+
     def __repr__(self):
         return f'<ProgressUpdate {self.id} for Task {self.task_id}>'
+        
+pass
