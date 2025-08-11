@@ -34,7 +34,7 @@ db.init_app(app)
 
 # Import models after db initialization
 with app.app_context():
-    from task_models import Task, ProgressUpdate
+    from models_task import Task, ProgressUpdate
     db.create_all()
     
 @app.route('/')
