@@ -38,6 +38,8 @@ from task_models import Task, ProgressUpdate
 
 @app.route('/')
 def index():
+    return "App funcionando correctamente"
+
     status_filter = request.args.get('status', 'all')
     responsible_filter = request.args.get('responsible', '')
     
