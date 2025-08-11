@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-6 text-primary">
+                <i class="fas fa-tasks me-2"></i>
+                Gestión de Rutinas Operativas
+            </h1>
+            <a href="{{ url_for('add_task') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Nueva Tarea
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Task Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card">
+            <h3 id="total-tasks">{{ tasks|length }}</h3>
+            <p>Total de Tareas</p>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card" style="background: linear-gradient(135deg, #28a745, #20c997);">
+            <h3 id="completed-tasks">{{ tasks|selectattr('completed')|list|length }}</h3>
+            <p>Completadas</p>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card" style="background: linear-gradient(135deg, #fd7e14, #ffc107);">
+            <h3 id="pending-tasks">{{ tasks|rejectattr('completed')|list|length }}</h3>
+            <p>Pendientes</p>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stats-card" style="background: linear-gradient(135deg, #dc3545, #e74c3c);">
+            <h3 id="overdue-tasks">{{ tasks|selectattr('is_overdue')|list|length }}</h3>
+            <p>Vencidas</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-section">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="status-filter" class="form-label">
+                <i class="fas fa-filter me-1"></i>Filtrar por Estado
+            </label>
+            <select id="status-filter" class="form-select">
+                <option value="all" {{ 'selected' if status_filter == 'all' else '' }}>Todas las tareas</option>
+                <option value="pending" {{ 'selected' if status_filter == 'pending' else '' }}>Pendientes</option>
+                <option value="completed" {{ 'selected' if status_filter == 'completed' else '' }}>Completadas</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="responsible-filter" class="form-label">
+                <i class="fas fa-user me-1"></i>Filtrar por Responsable
+            </label>
+            <select id="responsible-filter" class="form-select">
+                <option value="">Todos los responsables</option>
+                {% for responsible in responsible_list %}
+                    <option value="{{ responsible }}" {{ 'selected' if responsible_filter == responsible else '' }}>
+                        {{ responsible }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button id="clear-filters" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Limpiar Filtros
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Tasks List -->
+<div class="row">
+    <div class="col-12">
+        {% if tasks %}
+            <div class="row">
+                {% for task in tasks %}
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card task-card {{ task.status_class }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="task-title">{{ task.title }}</h5>
+                                <div class="task-actions">
+                                    <a href="{{ url_for('view_task_progress', task_id=task.id) }}" 
+                                       class="btn btn-outline-info"
+                                       title="Ver avances">
+                                        <i class="fas fa-chart-line"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('toggle_task', task_id=task.id) }}" class="d-inline">
+                                        <button type="submit" 
+                                                class="btn btn-toggle-task {{ 'btn-outline-warning' if task.completed else 'btn-outline-success' }}"
+                                                data-task-title="{{ task.title }}"
+                                                data-completed="{{ task.completed|lower }}"
+                                                title="{{ 'Marcar como pendiente' if task.completed else 'Marcar como completada' }}">
+                                            <i class="fas fa-{{ 'undo' if task.completed else 'check' }}"></i>
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('edit_task', task_id=task.id) }}" 
+                                       class="btn btn-outline-primary"
+                                       title="Editar tarea">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" class="d-inline">
+                                        <button type="submit" 
+                                                class="btn btn-outline-danger btn-delete-task"
+                                                title="Eliminar tarea">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            {% if task.description %}
+                            <p class="task-description">{{ task.description }}</p>
+                            {% endif %}
+                            
+                            <!-- Progress Bar -->
+                            {% if not task.completed %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">Progreso</small>
+                                    <small class="text-muted">{{ task.progress_percentage }}%</small>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-info" 
+                                         role="progressbar" 
+                                         style="width: {{ task.progress_percentage }}%"
+                                         aria-valuenow="{{ task.progress_percentage }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                {% if task.progress_updates %}
+                                <small class="text-muted">
+                                    {{ task.progress_updates|length }} avance{{ 's' if task.progress_updates|length != 1 else '' }}
+                                </small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="task-meta">
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    <span class="badge badge-responsible">
+                                        <i class="fas fa-user me-1"></i>{{ task.responsible }}
+                                    </span>
+                                    
+                                    {% if task.due_date %}
+                                        <span class="badge {{ 'badge-overdue' if task.is_overdue else 'badge-due-date' }}">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ task.due_date.strftime('%d/%m/%Y') }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    {% if task.completed %}
+                                        <span class="badge badge-completed">
+                                            <i class="fas fa-check me-1"></i>Completada
+                                        </span>
+                                    {% elif task.is_overdue %}
+                                        <span class="badge badge-overdue">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Vencida
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Creada: {{ task.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    {% if task.completed_at %}
+                                        <br>Completada: {{ task.completed_at.strftime('%d/%m/%Y %H:%M') }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>No hay tareas que mostrar</h3>
+                <p>{% if status_filter != 'all' or responsible_filter %}
+                    No se encontraron tareas con los filtros aplicados.
+                    <br><a href="{{ url_for('index') }}" class="btn btn-outline-primary mt-2">Ver todas las tareas</a>
+                {% else %}
+                    Comience agregando una nueva tarea para organizar sus rutinas operativas.
+                    <br><a href="{{ url_for('add_task') }}" class="btn btn-primary mt-2">Crear primera tarea</a>
+                {% endif %}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

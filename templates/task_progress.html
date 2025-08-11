@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Avances de Tarea - {{ task.title }} - Rutinas Operaciones CPB{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="display-6 text-primary">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Avances de Tarea
+                </h1>
+                <p class="text-muted">{{ task.title }}</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('add_progress', task_id=task.id) }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Registrar Avance
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Task Summary Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card task-card {{ task.status_class }}">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="task-title">{{ task.title }}</h5>
+                        {% if task.description %}
+                        <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+                        
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge badge-responsible">
+                                <i class="fas fa-user me-1"></i>{{ task.responsible }}
+                            </span>
+                            
+                            {% if task.due_date %}
+                                <span class="badge {{ 'badge-overdue' if task.is_overdue else 'badge-due-date' }}">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ task.due_date.strftime('%d/%m/%Y') }}
+                                </span>
+                            {% endif %}
+                            
+                            {% if task.completed %}
+                                <span class="badge badge-completed">
+                                    <i class="fas fa-check me-1"></i>Completada
+                                </span>
+                            {% elif task.is_overdue %}
+                                <span class="badge badge-overdue">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Vencida
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h6 class="text-muted">Progreso</h6>
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-success" 
+                                     role="progressbar" 
+                                     style="width: {{ task.progress_percentage }}%"
+                                     aria-valuenow="{{ task.progress_percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ task.progress_percentage }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                {{ progress_updates|length }} avance{{ 's' if progress_updates|length != 1 else '' }} registrado{{ 's' if progress_updates|length != 1 else '' }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 justify-content-end">
+                    <form method="POST" action="{{ url_for('toggle_task', task_id=task.id) }}" class="d-inline">
+                        <button type="submit" 
+                                class="btn {{ 'btn-outline-warning' if task.completed else 'btn-outline-success' }} btn-sm"
+                                data-task-title="{{ task.title }}"
+                                data-completed="{{ task.completed|lower }}"
+                                title="{{ 'Marcar como pendiente' if task.completed else 'Marcar como completada' }}">
+                            <i class="fas fa-{{ 'undo' if task.completed else 'check' }} me-1"></i>
+                            {{ 'Marcar Pendiente' if task.completed else 'Marcar Completada' }}
+                        </button>
+                    </form>
+                    <a href="{{ url_for('edit_task', task_id=task.id) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit me-1"></i>Editar Tarea
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress Updates Timeline -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Historial de Avances
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if progress_updates %}
+                    <div class="timeline">
+                        {% for update in progress_updates %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker">
+                                <i class="fas fa-circle text-primary"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-1 text-primary">
+                                            <i class="fas fa-user me-1"></i>{{ update.created_by }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ update.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                        </small>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('delete_progress', progress_id=update.id) }}" class="d-inline">
+                                        <button type="submit" 
+                                                class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('¿Está seguro que desea eliminar este avance?')"
+                                                title="Eliminar avance">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <p class="mb-0">{{ update.description }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h4>No hay avances registrados</h4>
+                        <p>Esta tarea aún no tiene avances de progreso registrados.</p>
+                        <a href="{{ url_for('add_progress', task_id=task.id) }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>Registrar Primer Avance
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--pampa-blue);
+    opacity: 0.3;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.timeline-marker i {
+    font-size: 8px;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid var(--pampa-blue);
+}
+
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--success-green), #20c997) !important;
+}
+</style>
+{% endblock %}
