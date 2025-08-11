@@ -1,3 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Werkzeug
+python-dotenv
 altgraph==0.17.4
 cached-property==2.0.1
 certifi==2025.7.14
@@ -38,3 +42,4 @@ sspilib==0.3.1
 tzdata==2025.2
 tzlocal==5.3.1
 urllib3==2.5.0
+
