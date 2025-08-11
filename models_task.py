@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from config import db
+from app import db
 
 
 class Task(db.Model):
@@ -44,8 +44,8 @@ class Task(db.Model):
         
         # Count progress updates for this task
         from sqlalchemy import func
-        from app import db
-        update_count = db.session.query(func.count(ProgressUpdate.id)).filter_by(task_id=self.id).scalar() or 0
+update_count = db.session.query(func.count(ProgressUpdate.id)).filter_by(task_id=self.id).scalar() or 0
+
         
         if update_count == 0:
             return 0
