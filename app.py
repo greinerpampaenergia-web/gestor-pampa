@@ -18,11 +18,11 @@ db = SQLAlchemy(model_class=Base)
 
 # Create the app
 from config import create_app
-app = create_app()
-app.secret_key = os.environ.get("SESSION_SECRET", "pampa-energia-dev-key")
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+from extensions import db
+from task_models import Task, ProgressUpdate
 
-db.init_app(app)  
+app = create_app()
+
 
 # Configure the database
 database_url = os.environ.get("DATABASE_URL")
