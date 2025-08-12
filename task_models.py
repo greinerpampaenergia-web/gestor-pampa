@@ -1,5 +1,5 @@
 from datetime import datetime
-from app import db
+from extensions import db
 from sqlalchemy import func
 
 class Task(db.Model):
