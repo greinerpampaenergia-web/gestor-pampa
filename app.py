@@ -35,7 +35,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 db.init_app(app)
 
 # Import models after db initialization
-from models_task import Task, ProgressUpdate
+from task_models import Task, ProgressUpdate
 
 @app.route('/')
 def index():
