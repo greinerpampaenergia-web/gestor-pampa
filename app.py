@@ -35,8 +35,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# Initialize the app with the extension
-db.init_app(app)
+
 
 # Import models after db initialization
 from task_models import Task, ProgressUpdate
