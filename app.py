@@ -249,3 +249,4 @@ def delete_progress(progress_id):
 
 # Create tables
 with app.app_context():
+iniciar_app()
