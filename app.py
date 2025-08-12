@@ -248,6 +248,5 @@ def delete_progress(progress_id):
     return redirect(url_for('view_task_progress', task_id=task_id))
 
 # Create tables
-with app.app_context():
-    
-iniciar_app()
+with app.app_context():    
+    iniciar_app()
