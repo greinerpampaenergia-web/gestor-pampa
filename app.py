@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
+from extensions import db  
 import os
 import logging
 from datetime import datetime
@@ -19,6 +20,7 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "pampa-energia-dev-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+db.init_app(app)  
 
 # Configure the database
 database_url = os.environ.get("DATABASE_URL")
