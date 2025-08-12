@@ -1,30 +1,25 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
-from extensions import db  
 import os
 import logging
 from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-class Base(DeclarativeBase):
-    pass
 
-db = SQLAlchemy(model_class=Base)
 
 # Create the app
 from config import create_app
-from extensions import db
 from task_models import Task, ProgressUpdate
 
 app = create_app()
 
 with app.app_context():
     db.create_all()
+
+with app.app_context():
 
 
 
@@ -255,4 +250,3 @@ def delete_progress(progress_id):
 
 # Create tables
 with app.app_context():
-    db.create_all()
