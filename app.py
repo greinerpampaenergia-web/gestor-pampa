@@ -23,6 +23,10 @@ from task_models import Task, ProgressUpdate
 
 app = create_app()
 
+with app.app_context():
+    db.create_all()
+
+
 
 # Configure the database
 database_url = os.environ.get("DATABASE_URL")
