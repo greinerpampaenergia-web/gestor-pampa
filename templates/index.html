@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h3 mb-4">
+            <i class="fas fa-tasks me-2"></i>
+            Gestión de Procedimientos Operativos
+        </h1>
+    </div>
+</div>
+
+<!-- Formulario para agregar procedimiento -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Agregar Nuevo Procedimiento
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('agregar_procedimiento') }}" id="procedureForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">
+                                <i class="fas fa-file-alt me-1"></i>
+                                Nombre del Procedimiento *
+                            </label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required 
+                                   placeholder="Ej: Proceso de verificación de calidad" maxlength="100">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="fecha" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>
+                                Fecha *
+                            </label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="eficacia" class="form-label">
+                                <i class="fas fa-percentage me-1"></i>
+                                Eficacia (%) *
+                            </label>
+                            <input type="number" class="form-control" id="eficacia" name="eficacia" 
+                                   min="0" max="100" step="0.1" required placeholder="0-100">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="responsable" class="form-label">
+                                <i class="fas fa-user me-1"></i>
+                                Responsable *
+                            </label>
+                            <input type="text" class="form-control" id="responsable" name="responsable" required 
+                                   placeholder="Nombre del responsable" maxlength="50">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="observaciones" class="form-label">
+                                <i class="fas fa-comment me-1"></i>
+                                Observaciones
+                            </label>
+                            <textarea class="form-control" id="observaciones" name="observaciones" 
+                                      rows="3" maxlength="500" placeholder="Observaciones adicionales (opcional)"></textarea>
+                            <div class="form-text">Máximo 500 caracteres</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Guardar Procedimiento
+                            </button>
+                            <button type="reset" class="btn btn-secondary ms-2">
+                                <i class="fas fa-undo me-2"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de procedimientos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Procedimientos Registrados
+                </h5>
+                <span class="badge bg-secondary">{{ procedures|length }} procedimiento(s)</span>
+            </div>
+            <div class="card-body p-0">
+                {% if procedures %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">
+                                    <i class="fas fa-file-alt me-1"></i>
+                                    Nombre
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Fecha
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-user me-1"></i>
+                                    Responsable
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-chart-line me-1"></i>
+                                    Eficacia
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-comment me-1"></i>
+                                    Observaciones
+                                </th>
+                                <th scope="col" width="100">
+                                    <i class="fas fa-cogs me-1"></i>
+                                    Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for procedure in procedures %}
+                            <tr>
+                                <td>
+                                    <strong>{{ procedure.nombre }}</strong>
+                                </td>
+                                <td>
+                                    <i class="fas fa-calendar-alt me-1 text-muted"></i>
+                                    {{ procedure.fecha }}
+                                </td>
+                                <td>
+                                    <i class="fas fa-user-circle me-1 text-muted"></i>
+                                    {{ procedure.responsable }}
+                                </td>
+                                <td>
+                                    <span class="badge {% if procedure.eficacia >= 80 %}bg-success{% elif procedure.eficacia >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ "%.1f"|format(procedure.eficacia) }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if procedure.observaciones %}
+                                        <span class="text-truncate d-inline-block" style="max-width: 200px;" 
+                                              title="{{ procedure.observaciones }}">
+                                            {{ procedure.observaciones }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Sin observaciones</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('eliminar_procedimiento', procedure_id=procedure.id) }}" 
+                                       class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('¿Está seguro de que desea eliminar este procedimiento?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay procedimientos registrados</h5>
+                    <p class="text-muted">Use el formulario anterior para agregar su primer procedimiento.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Set today's date as default for the date input
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('fecha');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+    
+    // Character counter for observations
+    const observationsTextarea = document.getElementById('observaciones');
+    const formText = observationsTextarea.nextElementSibling;
+    
+    observationsTextarea.addEventListener('input', function() {
+        const remaining = 500 - this.value.length;
+        formText.textContent = `${remaining} caracteres restantes`;
+        formText.className = remaining < 50 ? 'form-text text-warning' : 'form-text';
+    });
+    
+    // Form validation
+    const form = document.getElementById('procedureForm');
+    form.addEventListener('submit', function(e) {
+        const eficacia = document.getElementById('eficacia').value;
+        if (eficacia < 0 || eficacia > 100) {
+            e.preventDefault();
+            alert('La eficacia debe estar entre 0 y 100');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

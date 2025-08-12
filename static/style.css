@@ -1,0 +1,63 @@
+/* Custom styles for the application */
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.badge {
+    font-size: 0.85em;
+}
+
+.card {
+    border: 1px solid var(--bs-border-color);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.btn {
+    transition: all 0.15s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Form validation styles */
+.form-control:invalid {
+    border-color: var(--bs-danger);
+}
+
+.form-control:valid {
+    border-color: var(--bs-success);
+}
+
+/* Loading state */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Empty state styling */
+.fa-inbox {
+    opacity: 0.5;
+}
